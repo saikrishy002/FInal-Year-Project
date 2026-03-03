@@ -25,7 +25,7 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'expiryguard_secret')
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL',
-        'mysql+pymysql://root:Jarvis@localhost/expiryguard_db'
+        'sqlite:///expiryguard.db'
     )
     # Fix for Heroku/Render postgres:// vs postgresql://
     if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
