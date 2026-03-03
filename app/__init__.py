@@ -141,17 +141,26 @@ def create_app():
             db.session.rollback()
             logger.error(f"Auto-migration check failed: {e}")
 
-    # Run migration and initialize scheduler
+    # ── Database & Scheduler Initialization ────────────────
     with app.app_context():
         try:
+            # 1. Initialize tables from models
+            logger.info("Initializing database tables...")
             db.create_all()
+            
+            # 2. Run schema migrations/checks
+            logger.info("Running auto-migration...")
             auto_migrate()
             
-            # Initialize the background alert scheduler for production/development
+            # 3. Initialize background scheduler
+            logger.info("Initializing background scheduler...")
             from .scheduler import init_scheduler
             init_scheduler(app)
             
+            logger.info("App context initialization complete")
         except Exception as e:
-            logger.error(f"Error during app context initialization: {e}")
+            # Log the error but don't crash the whole app if possible
+            # Note: Database failure will still cause 500s later, but we get the log now.
+            logger.critical(f"CRITICAL ERROR during app initialization: {e}", exc_info=True)
 
     return app
