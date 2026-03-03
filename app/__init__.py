@@ -99,104 +99,46 @@ def create_app():
     # ── Database Auto-Migration ──────────────────────────
     def auto_migrate():
         """
-        Automatically add missing columns and create missing tables so the
-        application can start without manual SQL migration scripts.
+        Automatically add missing columns so the application can start
+        without manual SQL migration scripts.
         """
         try:
             inspector = inspect(db.engine)
             table_names = inspector.get_table_names()
 
-            # ── users table ──────────────────────────────────────────
+            # ── users table columns ──────────────────────────────────────────
             if 'users' in table_names:
                 existing = {c['name'] for c in inspector.get_columns('users')}
-                if 'email_alerts_enabled' not in existing:
-                    db.session.execute(text("ALTER TABLE users ADD COLUMN email_alerts_enabled BOOLEAN DEFAULT TRUE;"))
-                if 'alert_before_days' not in existing:
-                    db.session.execute(text("ALTER TABLE users ADD COLUMN alert_before_days INTEGER DEFAULT 3;"))
-                if 'role' not in existing:
-                    db.session.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'home';"))
-                if 'is_active' not in existing:
-                    db.session.execute(text("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE;"))
+                with db.session.begin_nested():
+                    if 'email_alerts_enabled' not in existing:
+                        db.session.execute(text("ALTER TABLE users ADD COLUMN email_alerts_enabled BOOLEAN DEFAULT TRUE;"))
+                    if 'alert_before_days' not in existing:
+                        db.session.execute(text("ALTER TABLE users ADD COLUMN alert_before_days INTEGER DEFAULT 3;"))
+                    if 'role' not in existing:
+                        db.session.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'home';"))
+                    if 'is_active' not in existing:
+                        db.session.execute(text("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE;"))
 
-            # ── items table ──────────────────────────────────────────
+            # ── items table columns ──────────────────────────────────────────
             if 'items' in table_names:
                 existing = {c['name'] for c in inspector.get_columns('items')}
-                if 'alert_sent' not in existing:
-                    db.session.execute(text("ALTER TABLE items ADD COLUMN alert_sent BOOLEAN DEFAULT FALSE;"))
-                if 'created_at' not in existing:
-                    db.session.execute(text("ALTER TABLE items ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP;"))
-                if 'predicted_waste' not in existing:
-                    db.session.execute(text("ALTER TABLE items ADD COLUMN predicted_waste FLOAT;"))
-                if 'recommendation' not in existing:
-                    db.session.execute(text("ALTER TABLE items ADD COLUMN recommendation VARCHAR(50);"))
-                if 'buying_advice' not in existing:
-                    db.session.execute(text("ALTER TABLE items ADD COLUMN buying_advice VARCHAR(200);"))
-
-            # ── shop_products table ──────────────────────────────────
-            if 'shop_products' not in table_names:
-                db.session.execute(text("""
-                    CREATE TABLE shop_products (
-                        id INTEGER PRIMARY KEY AUTO_INCREMENT,
-                        name VARCHAR(150) NOT NULL,
-                        category VARCHAR(100),
-                        stock INTEGER DEFAULT 0,
-                        price FLOAT DEFAULT 0.0,
-                        promotion VARCHAR(200),
-                        user_id INTEGER NOT NULL,
-                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (user_id) REFERENCES users(id)
-                    );
-                """))
-
-            # ── home_needs table ─────────────────────────────────────
-            if 'home_needs' not in table_names:
-                db.session.execute(text("""
-                    CREATE TABLE home_needs (
-                        id INTEGER PRIMARY KEY AUTO_INCREMENT,
-                        name VARCHAR(150) NOT NULL,
-                        category VARCHAR(100),
-                        priority VARCHAR(20) DEFAULT 'medium',
-                        status VARCHAR(20) DEFAULT 'pending',
-                        user_id INTEGER NOT NULL,
-                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (user_id) REFERENCES users(id)
-                    );
-                """))
-
-            # ── role_switch_requests table ───────────────────────────
-            if 'role_switch_requests' not in table_names:
-                db.session.execute(text("""
-                    CREATE TABLE role_switch_requests (
-                        id INTEGER PRIMARY KEY AUTO_INCREMENT,
-                        user_id INTEGER NOT NULL,
-                        current_role VARCHAR(20) NOT NULL,
-                        requested_role VARCHAR(20) NOT NULL,
-                        status VARCHAR(20) DEFAULT 'pending',
-                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (user_id) REFERENCES users(id)
-                    );
-                """))
-
-            # ── admin_logs table (audit trail) ───────────────────────
-            if 'admin_logs' not in table_names:
-                db.session.execute(text("""
-                    CREATE TABLE admin_logs (
-                        id INTEGER PRIMARY KEY AUTO_INCREMENT,
-                        admin_id INTEGER NOT NULL,
-                        action VARCHAR(100) NOT NULL,
-                        target_user_id INTEGER,
-                        details TEXT,
-                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (admin_id) REFERENCES users(id),
-                        FOREIGN KEY (target_user_id) REFERENCES users(id)
-                    );
-                """))
+                with db.session.begin_nested():
+                    if 'alert_sent' not in existing:
+                        db.session.execute(text("ALTER TABLE items ADD COLUMN alert_sent BOOLEAN DEFAULT FALSE;"))
+                    if 'created_at' not in existing:
+                        db.session.execute(text("ALTER TABLE items ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP;"))
+                    if 'predicted_waste' not in existing:
+                        db.session.execute(text("ALTER TABLE items ADD COLUMN predicted_waste FLOAT;"))
+                    if 'recommendation' not in existing:
+                        db.session.execute(text("ALTER TABLE items ADD COLUMN recommendation VARCHAR(50);"))
+                    if 'buying_advice' not in existing:
+                        db.session.execute(text("ALTER TABLE items ADD COLUMN buying_advice VARCHAR(200);"))
 
             db.session.commit()
-            logger.info("Database schema migrated successfully")
+            logger.info("Database schema check/migration completed")
         except Exception as e:
             db.session.rollback()
-            logger.error(f"Auto-migration failed: {e}")
+            logger.error(f"Auto-migration check failed: {e}")
 
     # Run migration and initialize scheduler
     with app.app_context():
