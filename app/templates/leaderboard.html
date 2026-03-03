@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section role="region" aria-labelledby="lb-heading" class="mt-4">
+  <div class="text-center mb-4">
+    <h2 id="lb-heading"><i class="fas fa-trophy text-warning"></i> Waste Score Leaderboard</h2>
+    <p class="text-muted">Users ranked by waste efficiency — lowest waste score is best</p>
+  </div>
+
+  {% if board %}
+  <div class="table-responsive">
+    <table id="leaderboardTable" class="table table-bordered table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th class="text-center" style="width:60px;">Rank</th>
+          <th>Username</th>
+          <th class="text-end">Total Qty</th>
+          <th class="text-end">Total Predicted Waste</th>
+          <th class="text-end">Waste Ratio</th>
+          <th style="min-width:200px;">Waste Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in board %}
+        <tr>
+          <td class="text-center fw-bold fs-5">
+            {% if loop.index == 1 %}
+              <span title="Gold">🥇</span>
+            {% elif loop.index == 2 %}
+              <span title="Silver">🥈</span>
+            {% elif loop.index == 3 %}
+              <span title="Bronze">🥉</span>
+            {% else %}
+              {{ loop.index }}
+            {% endif %}
+          </td>
+          <td>
+            <i class="fas fa-user-circle text-secondary"></i>
+            <strong>{{ entry.username }}</strong>
+          </td>
+          <td class="text-end">{{ entry.total_quantity }}</td>
+          <td class="text-end">{{ entry.total_waste }}</td>
+          <td class="text-end">{{ entry.waste_ratio }}%</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress flex-grow-1" style="height:22px;">
+                {% if entry.waste_score <= 30 %}
+                  {% set bar_color = "bg-success" %}
+                {% elif entry.waste_score <= 60 %}
+                  {% set bar_color = "bg-warning" %}
+                {% else %}
+                  {% set bar_color = "bg-danger" %}
+                {% endif %}
+                <div class="progress-bar {{ bar_color }}" role="progressbar"
+                     style="width: {{ entry.waste_score }}%;"
+                     aria-valuenow="{{ entry.waste_score }}" aria-valuemin="0" aria-valuemax="100">
+                </div>
+              </div>
+              <span class="fw-bold" style="min-width:52px;">{{ entry.waste_score }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info text-center">
+    <i class="fas fa-info-circle"></i> No data yet. Upload items to see the leaderboard.
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('#leaderboardTable').DataTable({
+        "paging": false,
+        "searching": false,
+        "info": false,
+        "ordering": false
+    });
+});
+</script>
+{% endblock %}

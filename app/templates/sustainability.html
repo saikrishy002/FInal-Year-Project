@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Sustainability Report{% endblock %}
+
+{% block content %}
+<section class="container mt-4 pb-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="fas fa-leaf text-success me-2"></i> Sustainability & Savings</h2>
+            <p class="text-muted">Tracking your positive impact on the environment and your wallet.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <span class="badge bg-success-subtle text-success p-2 px-3 rounded-pill border border-success-subtle">
+                <i class="fas fa-certificate me-1"></i> Efficiency Level: <span
+                    id="efficiencyLevel">Calculating...</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Impact Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 text-center bg-gradient-savings text-white">
+                <div class="card-body">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25"
+                        style="width: 50px; height: 50px;">
+                        <i class="fas fa-wallet fa-lg"></i>
+                    </div>
+                    <h6 class="text-uppercase small fw-bold opacity-75">Estimated Savings</h6>
+                    <h2 class="display-6 fw-bold mb-0">₹<span id="savingsVal">0.00</span></h2>
+                    <p class="small mb-0 opacity-75 mt-2">Reclaimed from potential waste</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 text-center bg-gradient-earth text-white">
+                <div class="card-body">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25"
+                        style="width: 50px; height: 50px;">
+                        <i class="fas fa-cloud-sun fa-lg"></i>
+                    </div>
+                    <h6 class="text-uppercase small fw-bold opacity-75">CO2 Impact Reduction</h6>
+                    <h2 class="display-6 fw-bold mb-0"><span id="co2Val">0.00</span> kg</h2>
+                    <p class="small mb-0 opacity-75 mt-2">Carbon footprint prevented</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 text-center bg-gradient-items text-white">
+                <div class="card-body">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25"
+                        style="width: 50px; height: 50px;">
+                        <i class="fas fa-check-circle fa-lg"></i>
+                    </div>
+                    <h6 class="text-uppercase small fw-bold opacity-75">Items Saved</h6>
+                    <h2 class="display-6 fw-bold mb-0"><span id="savedCount">0</span></h2>
+                    <p class="small mb-0 opacity-75 mt-2">Consumed before expiry</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Efficiency Chart -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Waste Efficiency Trend</h5>
+                    <p class="text-muted small">Progress over the last 6 months</p>
+                </div>
+                <div class="card-body p-4">
+                    <canvas id="efficiencyChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badges & Achievements -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Sustainability Badges</h5>
+                </div>
+                <div class="card-body px-4">
+                    <div id="badge-container" class="d-flex flex-wrap gap-3 mt-2">
+                        <!-- Badges will be injected here -->
+                        <div class="badge-item opacity-50" title="Save 10 items">
+                            <i class="fas fa-seedling fa-2x text-success"></i>
+                            <div class="small mt-1">Starter</div>
+                        </div>
+                        <div class="badge-item opacity-50" title="Save ₹1000">
+                            <i class="fas fa-medal fa-2x text-warning"></i>
+                            <div class="small mt-1">Saver</div>
+                        </div>
+                        <div class="badge-item opacity-50" title="Reduce 10kg CO2">
+                            <i class="fas fa-globe-asia fa-2x text-info"></i>
+                            <div class="small mt-1">Guardian</div>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <h6>Tip for the month:</h6>
+                    <div class="alert alert-success-subtle border-0 rounded-4">
+                        <i class="fas fa-lightbulb me-2"></i> Did you know? Using ExpiryGuard reduces household food
+                        waste by up to 30%!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .bg-gradient-savings {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .bg-gradient-earth {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    .bg-gradient-items {
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    }
+
+    .badge-item {
+        text-align: center;
+        width: 70px;
+        filter: grayscale(1);
+    }
+
+    .badge-item.active {
+        filter: none;
+        opacity: 1 !important;
+    }
+
+    .card {
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch("{{ url_for('reports.get_impact_stats') }}")
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('savingsVal').textContent = data.savings.toLocaleString();
+                document.getElementById('co2Val').textContent = data.co2;
+                document.getElementById('savedCount').textContent = data.items_saved;
+
+                // Set efficiency level
+                const level = data.efficiency_score > 90 ? 'Expert' : (data.efficiency_score > 70 ? 'Advanced' : 'Beginner');
+                document.getElementById('efficiencyLevel').textContent = level;
+
+                // Grant badges based on stats
+                if (data.items_saved >= 1) document.querySelectorAll('.badge-item')[0].classList.add('active');
+                if (data.savings >= 500) document.querySelectorAll('.badge-item')[1].classList.add('active');
+                if (data.co2 >= 5) document.querySelectorAll('.badge-item')[2].classList.add('active');
+
+                // Render Chart
+                const ctx = document.getElementById('efficiencyChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.trend.labels,
+                        datasets: [{
+                            label: 'Kitchen Efficiency %',
+                            data: data.trend.efficiency,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { min: 0, max: 100 }
+                        }
+                    }
+                });
+            });
+    });
+</script>
+{% endblock %}

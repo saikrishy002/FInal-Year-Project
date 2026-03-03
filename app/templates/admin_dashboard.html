@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block content %}
+<section role="region" aria-labelledby="admin-heading" class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 id="admin-heading"><i class="fas fa-shield-alt"></i> Admin Dashboard</h2>
+            <p class="lead mb-0">System overview <span class="badge bg-dark">Admin</span></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin.users_list') }}" class="btn btn-outline-primary">
+                <i class="fas fa-users me-1"></i> Manage Users
+            </a>
+            <a href="{{ url_for('admin.logs') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-clipboard-list me-1"></i> Activity Logs
+            </a>
+        </div>
+    </div>
+
+    <!-- Stat cards row 1 -->
+    <div class="row text-center mb-4">
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card stat-card" style="background: linear-gradient(135deg, #6366f1, #4338ca);">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">{{ users|length }}</div>
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card stat-card" style="background: linear-gradient(135deg, #10b981, #065f46);">
+                <div class="stat-label">Active</div>
+                <div class="stat-value">{{ active_count }}</div>
+                <i class="fas fa-user-check"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card stat-card" style="background: linear-gradient(135deg, #f59e0b, #92400e);">
+                <div class="stat-label">Pending Requests</div>
+                <div class="stat-value">{{ pending_requests|length }}</div>
+                <i class="fas fa-exchange-alt"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card stat-card" style="background: linear-gradient(135deg, #ef4444, #991b1b);">
+                <div class="stat-label">Inactive</div>
+                <div class="stat-value">{{ inactive_count }}</div>
+                <i class="fas fa-user-slash"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat cards row 2 -->
+    <div class="row text-center mb-4">
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card stat-card" style="background: linear-gradient(135deg, #0ea5e9, #0369a1);">
+                <div class="stat-label">Shop Users</div>
+                <div class="stat-value">{{ shop_count }}</div>
+                <i class="fas fa-store"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card stat-card" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                <div class="stat-label">Home Users</div>
+                <div class="stat-value">{{ home_count }}</div>
+                <i class="fas fa-home"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card stat-card" style="background: linear-gradient(135deg, #64748b, #334155);">
+                <div class="stat-label">Total Items</div>
+                <div class="stat-value">{{ total_items }}</div>
+                <i class="fas fa-database"></i>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card stat-card" style="background: linear-gradient(135deg, #ec4899, #9d174d);">
+                <div class="stat-label">Shop Products</div>
+                <div class="stat-value">{{ total_products }}</div>
+                <i class="fas fa-box"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending role-switch requests -->
+    {% if pending_requests %}
+    <div class="card mb-4 admin-card">
+        <div class="card-header" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;">
+            <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i> Pending Role Switch Requests
+                <span class="badge bg-white text-dark ms-2">{{ pending_requests|length }}</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Current Role</th>
+                        <th>Requested Role</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in pending_requests %}
+                    <tr>
+                        <td><strong>{{ req.user.username }}</strong></td>
+                        <td><span class="badge bg-secondary">{{ req.current_role }}</span></td>
+                        <td><span class="badge bg-primary">{{ req.requested_role }}</span></td>
+                        <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') if req.created_at else '—' }}</td>
+                        <td>
+                            <form method="POST" class="d-inline"
+                                action="{{ url_for('admin.handle_role_request', id=req.id, action='approve') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                            </form>
+                            <form method="POST" class="d-inline"
+                                action="{{ url_for('admin.handle_role_request', id=req.id, action='reject') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-light border-0 shadow-sm rounded-4 text-center py-4 mb-4">
+        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+        <p class="mb-0 fw-semibold">No pending role switch requests</p>
+    </div>
+    {% endif %}
+
+    <!-- Recent activity -->
+    <div class="row">
+        <!-- Recent shop uploads -->
+        <div class="col-md-6 mb-4">
+            <div class="card admin-card">
+                <div class="card-header" style="background: linear-gradient(135deg, #6366f1, #4338ca); color: #fff;">
+                    <h5 class="mb-0"><i class="fas fa-store me-2"></i> Recent Shop Uploads</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Stock</th>
+                                <th>User</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in recent_products %}
+                            <tr>
+                                <td>{{ p.name }}</td>
+                                <td>{{ p.category }}</td>
+                                <td>{{ p.stock }}</td>
+                                <td>{{ p.user.username }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% if not recent_products %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">No shop uploads yet</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent home needs -->
+        <div class="col-md-6 mb-4">
+            <div class="card admin-card">
+                <div class="card-header" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff;">
+                    <h5 class="mb-0"><i class="fas fa-home me-2"></i> Recent Home Needs</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Need</th>
+                                <th>Category</th>
+                                <th>Priority</th>
+                                <th>User</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for n in recent_needs %}
+                            <tr>
+                                <td>{{ n.name }}</td>
+                                <td>{{ n.category }}</td>
+                                <td>
+                                    {% if n.priority == 'high' %}
+                                    <span class="badge bg-danger">High</span>
+                                    {% elif n.priority == 'medium' %}
+                                    <span class="badge bg-warning text-dark">Medium</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Low</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ n.user.username }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% if not recent_needs %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-3">No home needs yet</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

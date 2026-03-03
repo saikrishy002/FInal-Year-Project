@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Alert Preferences{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">🔔 Notification Preferences</h3>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}" role="alert">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <!-- Email Alerts -->
+                        <div class="form-section mb-4">
+                            <h5 class="mb-3">📧 Email Notifications</h5>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="email_alerts" id="emailAlerts" {%
+                                    if user.email_alerts_enabled %}checked{% endif %}>
+                                <label class="form-check-label" for="emailAlerts">
+                                    <strong>Enable Email Alerts</strong>
+                                    <small class="d-block text-muted">Receive expiry notifications via email</small>
+                                </label>
+                            </div>
+                            <div class="alert alert-info mt-2">
+                                <strong>Current email:</strong> {{ user.email }}
+                            </div>
+                        </div>
+
+
+
+                        <!-- Alert Timing -->
+                        <div class="form-section mb-4">
+                            <h5 class="mb-3">⏰ Alert Timing</h5>
+                            <label for="alertDays" class="form-label">
+                                Alert me before expiry (days)
+                            </label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="alertDays" name="alert_before_days"
+                                    min="1" max="30" value="{{ user.alert_before_days or 3 }}">
+                                <span class="input-group-text">days</span>
+                            </div>
+                            <small class="d-block text-muted mt-2">
+                                You'll be alerted when items have this many days (or fewer) left until expiry
+                            </small>
+                        </div>
+
+                        <!-- Alert Level Explanation -->
+                        <div class="alert alert-light border">
+                            <h6 class="mb-3">🎯 Alert Levels</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <span class="badge bg-danger">Expired</span>
+                                    <small>Already expired</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-warning">Critical</span>
+                                    <small>Expires in 2 days</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-info">Warning</span>
+                                    <small>Expires in 5 days</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Diagnostic Buttons -->
+                        <div class="mb-3">
+                            <button id="testEmailBtn" class="btn btn-outline-primary btn-sm me-2">
+                                📧 Test Email Configuration
+                            </button>
+
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('alert.alerts') }}" class="btn btn-secondary">
+                                ← Back to Alerts
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                💾 Save Preferences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-section {
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1.5rem;
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .badge {
+        display: inline-block;
+        margin-bottom: 0.25rem;
+    }
+</style>
+
+<script>
+    // simple helpers for testing endpoints
+    async function callEndpoint(path, method = 'GET') {
+        try {
+            const resp = await fetch(path, { method });
+            const data = await resp.json();
+            alert(JSON.stringify(data, null, 2));
+        } catch (err) {
+            alert('Request failed: ' + err);
+        }
+    }
+
+    document.getElementById('testEmailBtn').addEventListener('click', () => {
+        callEndpoint("{{ url_for('alert.test_email') }}", "GET");
+    });
+
+
+</script>
+
+{% endblock %}

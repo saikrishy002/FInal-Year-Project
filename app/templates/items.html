@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <h2 class="fw-bold mb-1"><i class="fas fa-boxes text-primary me-2"></i> Inventory Tracking</h2>
+            <p class="text-secondary">Manage and monitor all your tracked items in one place.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <div class="btn-group shadow-sm">
+                <a href="{{ url_for('item.add_item') }}" class="btn btn-primary d-inline-flex align-items-center">
+                    <i class="fas fa-plus me-2"></i> Add Item
+                </a>
+                <a href="{{ url_for('item.bulk_upload') }}" class="btn btn-dark d-inline-flex align-items-center">
+                    <i class="fas fa-file-upload me-2"></i> Bulk Upload
+                </a>
+                <a href="{{ url_for('ml.refresh_all_predictions') }}"
+                    class="btn btn-outline-primary d-inline-flex align-items-center">
+                    <i class="fas fa-sync-alt me-2"></i> Sync ML
+                </a>
+                <form action="{{ url_for('item.clear_inventory') }}" method="POST" class="d-inline" id="clearInvForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-outline-danger d-inline-flex align-items-center"
+                        onclick="return confirm('CRITICAL: This will delete ALL your inventory items. This cannot be undone. Proceed?')">
+                        <i class="fas fa-trash-sweep me-2"></i> Clear Inventory
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table id="itemsTable" class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-secondary">
+                        <tr>
+                            <th class="ps-4">Item Name</th>
+                            <th>Category</th>
+                            <th class="text-center">Qty</th>
+                            <th>Expiry Date</th>
+                            <th>Days Left</th>
+                            <th>Status</th>
+                            <th>ML Waste Score</th>
+                            <th>Smart Action</th>
+                            <th class="text-center pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item, days, status in items %}
+                        <tr>
+                            <td class="ps-4 fw-semibold">{{ item.name }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ item.category }}</span></td>
+                            <td class="text-center">{{ item.quantity }}</td>
+                            <td class="text-nowrap">{{ item.expiry_date.strftime('%b %d, %Y') if item.expiry_date else
+                                'N/A' }}</td>
+                            <td>
+                                <span
+                                    class="fw-bold {% if days <= 3 %}text-danger{% elif days <= 7 %}text-warning{% else %}text-success{% endif %}">
+                                    {{ days }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if status == "Safe" %}
+                                <span
+                                    class="badge bg-success-subtle text-success border border-success-subtle">Safe</span>
+                                {% elif status == "Near Expiry" %}
+                                <span class="badge bg-info-subtle text-info border border-info-subtle">Near
+                                    Expiry</span>
+                                {% elif status == "Expiring Soon" %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Expiring
+                                    Soon</span>
+                                {% else %}
+                                <span
+                                    class="badge bg-danger-subtle text-danger border border-danger-subtle">Expired</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.predicted_waste is not none and item.quantity and item.quantity > 0 %}
+                                {% set raw_waste_pct = ((item.predicted_waste / item.quantity) * 100)|round|int %}
+                                {% set display_pct = 100 if raw_waste_pct > 100 else (0 if raw_waste_pct < 0 else
+                                    raw_waste_pct) %} <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                        <div class="progress-bar {% if raw_waste_pct > 70 %}bg-danger{% elif raw_waste_pct > 30 %}bg-warning{% else %}bg-success{% endif %}"
+                                            role="progressbar" data-width="{{ display_pct }}"></div>
+                                    </div>
+                                    <small class="fw-bold">{{ raw_waste_pct }}%</small>
+            </div>
+            {% else %}
+            <span class="text-muted small">Pending...</span>
+            {% endif %}
+            </td>
+            <td>
+                {% if item.recommendation %}
+                {% if item.recommendation == "Eat Now" %}
+                <span class="badge rounded-pill bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>
+                    Eat Now</span>
+                {% elif item.recommendation == "Eat Soon" %}
+                <span class="badge rounded-pill bg-warning text-dark"><i class="fas fa-utensils me-1"></i>
+                    Eat Soon</span>
+                {% elif item.recommendation == "Safe to Store" %}
+                <span class="badge rounded-pill bg-success"><i class="fas fa-check-circle me-1"></i>
+                    Safe</span>
+                {% elif item.recommendation == "Dispose" %}
+                <span class="badge rounded-pill bg-danger"><i class="fas fa-trash-alt me-1"></i>
+                    Dispose</span>
+                {% else %}
+                <span class="badge rounded-pill bg-secondary"><i class="fas fa-info-circle me-1"></i>
+                    {{ item.recommendation }}</span>
+                {% endif %}
+
+                {% if item.buying_advice %}
+                <div class="mt-1">
+                    <small class="text-primary fw-semibold" style="font-size: 0.75rem;">
+                        <i class="fas fa-lightbulb me-1"></i> {{ item.buying_advice }}
+                    </small>
+                </div>
+                {% endif %}
+                {% else %}
+                <span class="text-muted small">—</span>
+                {% endif %}
+            </td>
+            <td class="text-center pe-4">
+                <a href="{{ url_for('item.delete_item', id=item.id) }}"
+                    class="btn btn-link text-danger p-0 delete-btn hover-up">
+                    <i class="fas fa-trash-alt"></i>
+                </a>
+            </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#itemsTable').DataTable({
+            "order": [[4, "asc"]],
+            "pageLength": 15,
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search inventory...",
+                "lengthMenu": "_MENU_ per page"
+            },
+            "dom": '<"d-flex justify-content-between align-items-center p-3 border-bottom"f l>rt<"d-flex justify-content-between align-items-center p-3 border-top"i p>'
+        });
+
+        // Set progress bar widths from data attributes
+        $('.progress-bar[data-width]').each(function () {
+            var width = $(this).attr('data-width');
+            $(this).css('width', width + '%');
+        });
+
+        // Custom confirm dialog for deletion
+        $('.delete-btn').on('click', function (e) {
+            if (!confirm('Are you sure you want to delete this item?')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+<style>
+    .dataTables_filter input {
+        border-radius: 0.75rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid #e2e8f0;
+        outline: none;
+    }
+
+    .dataTables_filter input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .hover-up:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s ease;
+    }
+</style>
+{% endblock %}

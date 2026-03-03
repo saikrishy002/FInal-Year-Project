@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center min-vh-75">
+    <div class="col-md-7 text-center py-5">
+        <div class="error-container fade-in">
+            <div class="error-icon-wrapper mb-4">
+                <i class="fas fa-hourglass-half fa-5x text-warning opacity-25"></i>
+                <span class="error-code display-1 fw-bold text-warning">429</span>
+            </div>
+
+            <h1 class="display-5 fw-bold mb-3">Take a Breather!</h1>
+            <p class="lead text-muted mb-5">
+                You've made too many requests in a short period. Please wait a few moments and try again.
+                This is a security measure to protect your account.
+            </p>
+
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('user.login') }}" class="btn btn-primary btn-lg rounded-pill px-4">
+                    <i class="fas fa-sync-alt me-2"></i> Try Again
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .min-vh-75 {
+        min-height: 75vh;
+    }
+
+    .error-code {
+        position: relative;
+        z-index: 1;
+        letter-spacing: -5px;
+    }
+
+    .error-icon-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .error-icon-wrapper i {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 0;
+    }
+
+    .error-container {
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 2rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+</style>
+{% endblock %}

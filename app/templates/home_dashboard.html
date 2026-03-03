@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block content %}
+<section role="region" aria-labelledby="home-dash-heading" class="container mt-4">
+    <h2 id="home-dash-heading"><i class="fas fa-home"></i> Home Dashboard</h2>
+    <p class="lead">Welcome back, <strong>{{ current_user.username }}</strong>! <span
+            class="badge bg-success">Home</span></p>
+
+    <div class="row text-center mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white p-3">
+                <i class="fas fa-clipboard-list fa-2x"></i>
+                <div>Total Needs</div>
+                <div class="h4">{{ total_needs }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark p-3">
+                <i class="fas fa-clock fa-2x"></i>
+                <div>Pending</div>
+                <div class="h4">{{ pending }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white p-3">
+                <i class="fas fa-check-circle fa-2x"></i>
+                <div>Fulfilled</div>
+                <div class="h4">{{ fulfilled }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white p-3">
+                <i class="fas fa-box fa-2x"></i>
+                <div>Inventory Items</div>
+                <div class="h4">{{ total_items }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory health -->
+    <div class="row text-center mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-danger text-white p-3">
+                <div>Expired</div>
+                <div class="h4">{{ expired }}</div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-warning text-dark p-3">
+                <div>Expiring Soon</div>
+                <div class="h4">{{ expiring_soon }}</div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-success text-white p-3">
+                <div>Safe</div>
+                <div class="h4">{{ safe_count }}</div>
+            </div>
+        </div>
+    </div>
+
+    {% if local_deals %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden" style="background: rgba(59, 130, 246, 0.05);">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-shopping-bag me-2"></i> Sustainable Savings
+                        from Local Shops
+                    </h5>
+                    <p class="small text-muted mb-0">Deals that match your "Household Needs" list.</p>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for deal in local_deals %}
+                        <div class="col-md-4">
+                            <div class="bg-white p-3 rounded-3 shadow-sm border-start border-4 border-primary h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="fw-bold mb-0">{{ deal.product_name }}</h6>
+                                    <span class="badge bg-primary-subtle text-primary rounded-pill small"
+                                        style="font-size: 0.7rem;">{{ deal.shop_name }}</span>
+                                </div>
+                                <p class="text-success fw-bold mb-1"><i class="fas fa-tag me-1"></i> {{ deal.promotion
+                                    }}
+                                </p>
+                                <p class="small text-muted mb-2">Category: {{ deal.category }}</p>
+                                <a href="{{ url_for('home.needs') }}" class="btn btn-sm btn-primary w-100 rounded-pill">
+                                    Fulfill Need
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if local_deals %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden" style="background: rgba(59, 130, 246, 0.05);">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-primary"><i class="fas fa-shopping-bag me-2"></i> Sustainable Savings
+                        from Local Shops
+                    </h5>
+                    <p class="small text-muted mb-0">Deals that match your "Household Needs" list.</p>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for deal in local_deals %}
+                        <div class="col-md-4">
+                            <div class="bg-white p-3 rounded-3 shadow-sm border-start border-4 border-primary h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="fw-bold mb-0">{{ deal.product_name }}</h6>
+                                    <span class="badge bg-primary-subtle text-primary rounded-pill small"
+                                        style="font-size: 0.7rem;">{{ deal.shop_name }}</span>
+                                </div>
+                                <p class="text-success fw-bold mb-1"><i class="fas fa-tag me-1"></i> {{ deal.promotion
+                                    }}
+                                </p>
+                                <p class="small text-muted mb-2">Category: {{ deal.category }}</p>
+                                <a href="{{ url_for('home.needs') }}" class="btn btn-sm btn-primary w-100 rounded-pill">
+                                    Fulfill Need
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if smart_insights %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden" style="background: rgba(16, 185, 129, 0.05);">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-success"><i class="fas fa-lightbulb me-2"></i> Smart Purchasing
+                        Insights
+                    </h5>
+                    <p class="small text-muted mb-0">ML-driven advice based on your historical waste patterns.</p>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for insight in smart_insights %}
+                        <div class="col-md-4">
+                            <div class="bg-white p-3 rounded-3 shadow-sm border-start border-4 border-success h-100">
+                                <h6 class="fw-bold mb-1">{{ insight.category }}</h6>
+                                <p class="small text-secondary mb-2">{{ insight.advice }}</p>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-2" style="height: 4px;">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                            data-width="{{ insight.impact }}"></div>
+                                    </div>
+                                    <span class="small fw-bold text-success">{{ insight.impact }}%</span>
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">Waste Impact</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('home.needs') }}" class="btn btn-outline-info"><i class="fas fa-list"></i> View Needs</a>
+        <a href="{{ url_for('home.add_need') }}" class="btn btn-info text-white"><i class="fas fa-plus-circle"></i> Add
+            Single Need</a>
+        <a href="{{ url_for('home.upload') }}" class="btn btn-outline-success"><i class="fas fa-upload"></i> Upload
+            Needs</a>
+        <a href="{{ url_for('item.view_items') }}" class="btn btn-outline-primary"><i class="fas fa-box"></i> My
+            Inventory</a>
+        <a href="{{ url_for('item.bulk_upload') }}" class="btn btn-outline-secondary"><i class="fas fa-file-upload"></i>
+            Upload Inventory</a>
+    </div>
+
+    <br>
+    <div class="row">
+        <div class="col-md-6">
+            <canvas id="needsPie"></canvas>
+        </div>
+        <div class="col-md-6">
+            <canvas id="invBar"></canvas>
+        </div>
+    </div>
+</section>
+
+<script type="application/json" id="home-chart-data">
+  {{ {'pending': pending, 'fulfilled': fulfilled, 'expired': expired, 'expiring_soon': expiring_soon, 'safe': safe_count} | tojson }}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const d = JSON.parse(document.getElementById('home-chart-data').textContent);
+    new Chart(document.getElementById('needsPie'), { type: 'doughnut', data: { labels: ['Pending', 'Fulfilled'], datasets: [{ data: [d.pending, d.fulfilled], backgroundColor: ['#ffc107', '#198754'] }] } });
+    new Chart(document.getElementById('invBar'), { type: 'bar', data: { labels: ['Expired', 'Expiring Soon', 'Safe'], datasets: [{ label: 'Items', data: [d.expired, d.expiring_soon, d.safe], backgroundColor: ['#dc3545', '#ffc107', '#198754'] }] }, options: { scales: { y: { beginAtZero: true } } } });
+
+    // Set progress bar widths from data attributes
+    document.querySelectorAll('.progress-bar[data-width]').forEach(function (bar) {
+        var width = bar.getAttribute('data-width');
+        bar.style.width = width + '%';
+    });
+</script>
+{% endblock %}

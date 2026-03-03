@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Expiry Alerts{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Header with Actions -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>🚨 Expiry Alerts</h2>
+                <div class="button-group">
+                    <a href="{{ url_for('alert.preferences') }}" class="btn btn-outline-primary me-2">
+                        ⚙️ Preferences
+                    </a>
+                    <form method="POST" action="{{ url_for('alert.send_alerts') }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button type="submit" class="btn btn-success">
+                            📢 Send Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'info' }}"
+                role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <!-- Alert Summary Stats -->
+            {% if alerts %}
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Expired</h5>
+                            <h3>{{ alerts | selectattr('level', 'equalto', 'EXPIRED') | list | length }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Critical</h5>
+                            <h3>{{ alerts | selectattr('level', 'equalto', 'CRITICAL') | list | length }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Warning</h5>
+                            <h3>{{ alerts | selectattr('level', 'equalto', 'WARNING') | list | length }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Total</h5>
+                            <h3>{{ alerts | length }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Alerts List -->
+            {% if alerts %}
+            <div class="alerts-container">
+                {% for alert in alerts %}
+                <div class="card mb-3 alert-card alert-{{ alert.level | lower }}">
+                    <div class="card-header alert-header-{{ alert.level | lower }}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">
+                                    <span class="badge alert-badge-{{ alert.level | lower }}">{{ alert.level }}</span>
+                                    <strong>{{ alert.item }}</strong>
+                                </h5>
+                                <small class="text-muted">{{ alert.category }}</small>
+                            </div>
+                            <div class="text-end">
+                                <h6 class="mb-0">{{ alert.expiry_date }}</h6>
+                                <small>
+                                    {% if alert.days_left < 0 %} <span class="text-danger">Expired {{ -alert.days_left
+                                        }} days ago</span>
+                                        {% elif alert.days_left == 0 %}
+                                        <span class="text-danger">Expires TODAY!</span>
+                                        {% else %}
+                                        <span>Expires in {{ alert.days_left }} day{{ 's' if alert.days_left != 1 else ''
+                                            }}</span>
+                                        {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Quantity:</strong> {{ alert.quantity }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Days Remaining:</strong>
+                                    <span class="badge bg-secondary">{{ alert.days_left }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light d-flex justify-content-between">
+                        <small class="text-muted">
+                            Priority:
+                            <strong>{{ alert.priority }}/5</strong>
+                        </small>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{{ url_for('item.delete_item', id=alert.id) }}" class="btn btn-danger"
+                                onclick="return confirm('Delete this item?')">
+                                🗑️ Delete
+                            </a>
+                            <button type="button" class="btn btn-outline-secondary"
+                                onclick="dismissAlert('{{ alert.id }}')" aria-label="Dismiss alert">
+                                ✓ Dismiss
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-success text-center" role="alert">
+                <h5>✅ No Active Alerts!</h5>
+                <p class="mb-0">All your items are safe. Great job managing your inventory!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .button-group {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .alert-card {
+        border-left: 5px solid;
+    }
+
+    .alert-expired {
+        border-left-color: #dc3545;
+    }
+
+    .alert-critical {
+        border-left-color: #ffc107;
+    }
+
+    .alert-warning {
+        border-left-color: #17a2b8;
+    }
+
+    .alert-header-expired {
+        background-color: #f8d7da;
+        border-bottom: 2px solid #dc3545;
+    }
+
+    .alert-header-critical {
+        background-color: #fff3cd;
+        border-bottom: 2px solid #ffc107;
+    }
+
+    .alert-header-warning {
+        background-color: #d1ecf1;
+        border-bottom: 2px solid #17a2b8;
+    }
+
+    .alert-badge-expired {
+        background-color: #dc3545 !important;
+    }
+
+    .alert-badge-critical {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    .alert-badge-warning {
+        background-color: #17a2b8 !important;
+    }
+
+    .alerts-container {
+        animation: slideIn 0.3s ease-in;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    function dismissAlert(itemId) {
+        // convert string id to integer, if necessary
+        const id = parseInt(itemId, 10);
+        if (isNaN(id)) {
+            console.error('Invalid item ID:', itemId);
+            return;
+        }
+
+        // build URL dynamically without using a placeholder
+        const baseUrl = `{{ url_for('alert.dismiss_alert', item_id=0) }}`;
+        const url = baseUrl.replace('/0', '/' + id);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    console.error('Error:', data.message || 'Unknown error');
+                    alert('Failed to dismiss alert. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error dismissing alert: ' + error.message);
+            });
+    }
+</script>
+{% endblock %}

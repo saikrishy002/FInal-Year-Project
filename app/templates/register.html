@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section role="region" aria-labelledby="register-heading" class="row justify-content-center align-items-center"
+    style="min-height: 80vh;">
+    <div class="col-md-6">
+        <article class="card shadow-lg">
+            <header class="card-header bg-success text-white text-center">
+                <h1 id="register-heading">Create Account</h1>
+            </header>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" name="username" class="form-control" placeholder="Username" required>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input type="email" name="email" class="form-control" placeholder="Email" required>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    </div>
+
+                    <!-- Role Selector -->
+                    <label class="form-label fw-bold mb-2">Select Your Role</label>
+                    <div class="row mb-3 g-2">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="role" id="role-shop" value="shop"
+                                autocomplete="off">
+                            <label class="btn btn-outline-primary w-100 py-3" for="role-shop">
+                                <i class="fas fa-store fa-2x d-block mb-1"></i>
+                                <strong>Shop</strong>
+                                <small class="d-block text-muted">Products & pricing</small>
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="role" id="role-home" value="home"
+                                autocomplete="off" checked>
+                            <label class="btn btn-outline-success w-100 py-3" for="role-home">
+                                <i class="fas fa-home fa-2x d-block mb-1"></i>
+                                <strong>Home</strong>
+                                <small class="d-block text-muted">Household needs</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success w-100">
+                        <i class="fas fa-user-plus"></i> Register
+                    </button>
+                </form>
+            </div>
+            <footer class="card-footer text-center">
+                Already have an account?
+                <a href="{{ url_for('user.login') }}">Login</a>
+            </footer>
+        </article>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<section role="region" aria-labelledby="hu-heading" class="row justify-content-center mt-4">
+    <div class="col-md-7">
+        <article class="card shadow">
+            <header class="card-header bg-success text-white">
+                <h2 id="hu-heading"><i class="fas fa-upload"></i> Upload Household Needs</h2>
+            </header>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <div class="mb-3">
+                        <label class="form-label">Select CSV, Excel, or JSON file</label>
+                        <input type="file" name="file" class="form-control" accept=".csv,.xlsx,.json" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload
+                    </button>
+                </form>
+
+                <div class="alert alert-light border mt-3">
+                    <h6>Required columns:</h6>
+                    <code>name, category</code>
+                    <br><small class="text-muted">Optional: <code>priority</code> (low/medium/high), <code>status</code>
+                        (pending/fulfilled)</small>
+                </div>
+
+                <div class="alert alert-info mt-2">
+                    <h6>JSON format example:</h6>
+                    <pre class="mb-0">[
+  {"name": "Rice", "category": "Grocery", "priority": "high"},
+  {"name": "Soap", "category": "Toiletry", "priority": "low"}
+]</pre>
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
+{% endblock %}

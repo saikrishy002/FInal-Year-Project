@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container mt-4" style="max-width: 640px;">
+    <div class="mb-4">
+        <a href="{{ url_for('admin.users_list') }}" class="btn btn-outline-secondary btn-sm mb-3">
+            <i class="fas fa-arrow-left me-1"></i> Back to Users
+        </a>
+        <h2>
+            <i class="fas {{ 'fa-user-plus' if mode == 'add' else 'fa-user-edit' }}"></i>
+            {{ 'Add New User' if mode == 'add' else 'Edit User' }}
+        </h2>
+    </div>
+
+    <div class="card admin-card">
+        <div class="card-body p-4">
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <div class="mb-3">
+                    <label for="username" class="form-label fw-semibold">
+                        <i class="fas fa-user me-1 text-muted"></i> Username
+                    </label>
+                    <input type="text" class="form-control" id="username" name="username"
+                        value="{{ user.username if user else '' }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-semibold">
+                        <i class="fas fa-envelope me-1 text-muted"></i> Email
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email"
+                        value="{{ user.email if user else '' }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label fw-semibold">
+                        <i class="fas fa-lock me-1 text-muted"></i>
+                        {{ 'Password' if mode == 'add' else 'New Password (leave blank to keep current)' }}
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" {{ 'required' if
+                        mode=='add' else '' }} placeholder="{{ 'Enter password' if mode == 'add' else '••••••••' }}">
+                </div>
+
+                <div class="mb-4">
+                    <label for="role" class="form-label fw-semibold">
+                        <i class="fas fa-user-tag me-1 text-muted"></i> Role
+                    </label>
+                    <select class="form-select" id="role" name="role">
+                        <option value="home" {{ 'selected' if user and user.role=='home' }}>Home</option>
+                        <option value="shop" {{ 'selected' if user and user.role=='shop' }}>Shop</option>
+                        <option value="admin" {{ 'selected' if user and user.role=='admin' }}>Admin</option>
+                    </select>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="fas fa-save me-1"></i>
+                        {{ 'Create User' if mode == 'add' else 'Save Changes' }}
+                    </button>
+                    <a href="{{ url_for('admin.users_list') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

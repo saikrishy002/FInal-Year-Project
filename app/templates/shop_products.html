@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<section role="region" aria-labelledby="sp-heading" class="mt-4">
+    <h3 id="sp-heading"><i class="fas fa-boxes"></i> My Products</h3>
+    <div class="d-flex gap-2 mb-3">
+        <a href="{{ url_for('shop.upload') }}" class="btn btn-info text-white"><i class="fas fa-upload"></i> Upload
+            Products</a>
+        <a href="{{ url_for('shop.dashboard') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i>
+            Dashboard</a>
+    </div>
+
+    <div class="table-responsive">
+        <table id="shopTable" class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Stock</th>
+                    <th>Price (₹)</th>
+                    <th>Promotion</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.category }}</td>
+                    <td>
+                        {% if p.stock < 10 %} <span class="badge bg-danger">{{ p.stock }}</span>
+                            {% else %}
+                            {{ p.stock }}
+                            {% endif %}
+                    </td>
+                    <td>{{ p.price }}</td>
+                    <td>
+                        {% if p.promotion %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-tags"></i> {{ p.promotion }}</span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('shop.delete_product', id=p.id) }}"
+                            class="btn btn-sm btn-danger delete-btn">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#shopTable').DataTable({ "order": [[2, "asc"]], "pageLength": 25 });
+        $('.delete-btn').on('click', function (e) { if (!confirm('Delete this product?')) e.preventDefault(); });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% block content %}
+<div class="container py-4">
+  <div class="row align-items-center mb-5">
+    <div class="col-lg-8">
+      <h1 class="display-5 fw-bold mb-1">Your <span class="text-gradient">Dashboard</span></h1>
+      <p class="text-secondary">Welcome back, <strong>{{ current_user.username }}</strong>! Here's an overview of your
+        expiry stats.</p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+      <a href="{{ url_for('item.add_item') }}" class="btn btn-primary shadow-sm hover-up">
+        <i class="fas fa-plus me-2"></i> Add New Item
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card bg-expired shadow-sm h-100">
+        <i class="fas fa-calendar-times"></i>
+        <div class="stat-label">Expired</div>
+        <div class="stat-value">{{ expired }}</div>
+        <div class="small opacity-75">Items past expiry</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card bg-expiring shadow-sm h-100">
+        <i class="fas fa-hourglass-half"></i>
+        <div class="stat-label">Expiring Soon</div>
+        <div class="stat-value">{{ expiring_soon }}</div>
+        <div class="small opacity-75">Next 3 days</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card bg-near shadow-sm h-100">
+        <i class="fas fa-clock"></i>
+        <div class="stat-label">Near Expiry</div>
+        <div class="stat-value">{{ near_expiry }}</div>
+        <div class="small opacity-75">Next 7 days</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="stat-card bg-safe shadow-sm h-100">
+        <i class="fas fa-check-circle"></i>
+        <div class="stat-label">Safe</div>
+        <div class="stat-value">{{ safe }}</div>
+        <div class="small opacity-75">Fresh inventory</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card p-4 h-100">
+        <h5 class="mb-4 d-flex align-items-center">
+          <i class="fas fa-chart-bar text-primary me-2"></i> Expiry Distribution
+        </h5>
+        <div style="height: 350px;">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card p-4 h-100">
+        <h5 class="mb-4 d-flex align-items-center">
+          <i class="fas fa-chart-pie text-secondary me-2"></i> Inventory Health
+        </h5>
+        <div style="max-height: 350px;">
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pass data safely as JSON to JS -->
+<script type="application/json" id="chart-data">
+  {{ {'expired': expired, 'expiring_soon': expiring_soon, 'near_expiry': near_expiry, 'safe': safe} | tojson }}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const chartData = JSON.parse(document.getElementById('chart-data').textContent);
+    const labels = ['Expired', 'Expiring Soon', 'Near Expiry', 'Safe'];
+    const dataValues = [chartData.expired, chartData.expiring_soon, chartData.near_expiry, chartData.safe];
+    const colors = ['#ef4444', '#f59e0b', '#0ea5e9', '#10b981'];
+
+    // Common options
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            usePointStyle: true,
+            padding: 20
+          }
+        }
+      }
+    };
+
+    // Pie chart
+    new Chart(document.getElementById('pieChart'), {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: dataValues,
+          backgroundColor: colors,
+          borderWidth: 0,
+          cutout: '70%'
+        }]
+      },
+      options: options
+    });
+
+    // Bar chart
+    new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Items',
+          data: dataValues,
+          backgroundColor: colors,
+          borderRadius: 8
+        }]
+      },
+      options: {
+        ...options,
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { display: false }
+          },
+          x: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

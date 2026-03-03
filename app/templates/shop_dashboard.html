@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<section role="region" aria-labelledby="shop-dash-heading" class="container mt-4">
+    <h2 id="shop-dash-heading"><i class="fas fa-store"></i> Shop Dashboard</h2>
+    <p class="lead">Welcome back, <strong>{{ current_user.username }}</strong>! <span
+            class="badge bg-primary">Shop</span></p>
+
+    <div class="row text-center mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white p-3">
+                <i class="fas fa-box fa-2x"></i>
+                <div>Total Products</div>
+                <div class="h4">{{ total }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-danger text-white p-3">
+                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                <div>Low Stock</div>
+                <div class="h4">{{ low_stock }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-dark p-3">
+                <i class="fas fa-tags fa-2x"></i>
+                <div>Active Promos</div>
+                <div class="h4">{{ active_promos }}</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white p-3">
+                <i class="fas fa-dollar-sign fa-2x"></i>
+                <div>Inventory Value</div>
+                <div class="h4">₹{{ total_value }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('shop.products') }}" class="btn btn-outline-primary"><i class="fas fa-list"></i> View
+            Products</a>
+        <a href="{{ url_for('shop.add_product') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Add Single Product
+        </a>
+        <a href="{{ url_for('shop.upload') }}" class="btn btn-outline-info"><i class="fas fa-upload"></i> Upload
+            Products</a>
+    </div>
+
+    <br>
+    <div class="row">
+        <div class="col-md-6">
+            <canvas id="shopPie"></canvas>
+        </div>
+        <div class="col-md-6">
+            <canvas id="shopBar"></canvas>
+        </div>
+    </div>
+</section>
+
+<script type="application/json" id="shop-chart-data">
+  {{ {'total': total, 'low_stock': low_stock, 'active_promos': active_promos} | tojson }}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const d = JSON.parse(document.getElementById('shop-chart-data').textContent);
+    const labels = ['In Stock', 'Low Stock', 'With Promos'];
+    const vals = [d.total - d.low_stock, d.low_stock, d.active_promos];
+    const colors = ['#0d6efd', '#dc3545', '#ffc107'];
+    new Chart(document.getElementById('shopPie'), { type: 'doughnut', data: { labels, datasets: [{ data: vals, backgroundColor: colors }] } });
+    new Chart(document.getElementById('shopBar'), { type: 'bar', data: { labels, datasets: [{ label: 'Count', data: vals, backgroundColor: colors }] }, options: { scales: { y: { beginAtZero: true } } } });
+</script>
+{% endblock %}

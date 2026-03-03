@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<section role="region" aria-labelledby="hn-heading" class="mt-4">
+    <h3 id="hn-heading"><i class="fas fa-clipboard-list"></i> My Household Needs</h3>
+    <div class="d-flex gap-2 mb-3">
+        <a href="{{ url_for('home.upload') }}" class="btn btn-success"><i class="fas fa-upload"></i> Upload Needs</a>
+        <a href="{{ url_for('home.dashboard') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i>
+            Dashboard</a>
+    </div>
+
+    <div class="table-responsive">
+        <table id="needsTable" class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for n in needs %}
+                <tr>
+                    <td>{{ n.name }}</td>
+                    <td>{{ n.category }}</td>
+                    <td>
+                        {% if n.priority == 'high' %}
+                        <span class="badge bg-danger">High</span>
+                        {% elif n.priority == 'medium' %}
+                        <span class="badge bg-warning text-dark">Medium</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Low</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if n.status == 'fulfilled' %}
+                        <span class="badge bg-success"><i class="fas fa-check"></i> Fulfilled</span>
+                        {% else %}
+                        <span class="badge bg-info">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('home.toggle_status', id=n.id) }}" class="btn btn-sm btn-outline-primary"
+                            title="Toggle status">
+                            <i class="fas fa-sync-alt"></i>
+                        </a>
+                        <a href="{{ url_for('home.delete_need', id=n.id) }}" class="btn btn-sm btn-danger delete-btn"
+                            title="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+        $('#needsTable').DataTable({ "order": [[2, "desc"]], "pageLength": 25 });
+        $('.delete-btn').on('click', function (e) { if (!confirm('Delete this need?')) e.preventDefault(); });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section role="region" aria-labelledby="addproduct-heading" class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <article class="card shadow border-0 rounded-4">
+            <header class="card-header bg-success text-white py-3 border-0 rounded-top-4">
+                <h3 id="addproduct-heading" class="mb-0"><i class="fas fa-plus-circle me-2"></i> Add Shop Product</h3>
+            </header>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Product Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-shopping-basket"></i></span>
+                            <input class="form-control" name="name" placeholder="e.g. Organic Milk, Whole Wheat Bread"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Category</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-list"></i></span>
+                            <select class="form-select" name="category" required>
+                                <option value="" selected disabled>Choose category</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat }}">{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Stock Quantity</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
+                                <input type="number" class="form-control" name="stock" value="0" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Price per Unit</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-rupee-sign"></i></span>
+                                <input type="number" step="0.01" class="form-control" name="price" value="0.00" min="0"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Special Promotion (Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                            <input class="form-control" name="promotion" placeholder="e.g. 20% Off, Buy 1 Get 1">
+                        </div>
+                        <small class="text-muted">Promoted products will appear in local user recommendations.</small>
+                    </div>
+
+                    <button class="btn btn-success w-100 py-2 rounded-pill fw-bold">
+                        <i class="fas fa-save me-1"></i> List Product
+                    </button>
+
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('shop.products') }}" class="text-decoration-none small text-muted">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Product List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </article>
+    </div>
+</section>
+
+{% endblock %}

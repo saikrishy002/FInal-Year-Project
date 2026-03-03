@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">👤 Your Profile</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" value="{{ user.username }}" disabled>
+                            <small class="text-muted">Cannot be changed</small>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" value="{{ user.email }}" disabled>
+                            <small class="text-muted">Cannot be changed</small>
+                        </div>
+
+                        <!-- Current Role -->
+                        <div class="mb-3">
+                            <label class="form-label">Current Role</label>
+                            <div>
+                                {% if user.role == 'shop' %}
+                                <span class="badge bg-primary fs-6"><i class="fas fa-store"></i> Shop</span>
+                                {% elif user.role == 'home' %}
+                                <span class="badge bg-success fs-6"><i class="fas fa-home"></i> Home</span>
+                                {% elif user.role == 'admin' %}
+                                <span class="badge bg-dark fs-6"><i class="fas fa-shield-alt"></i> Admin</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Alert Preferences Summary -->
+                        <div class="alert alert-light border mt-4">
+                            <h6 class="mb-3">⚙️ Current Alert Settings</h6>
+                            <ul class="mb-0">
+                                <li>Email Alerts: <span
+                                        class="badge bg-{{ 'success' if user.email_alerts_enabled else 'danger' }}">{{
+                                        'Enabled' if user.email_alerts_enabled else 'Disabled' }}</span></li>
+                                <li>Alert Threshold: <strong>{{ user.alert_before_days }} days</strong> before expiry
+                                </li>
+                            </ul>
+                            <a href="{{ url_for('alert.preferences') }}" class="btn btn-sm btn-outline-primary mt-3">
+                                Manage Preferences →
+                            </a>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary">
+                                ← Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                💾 Save Changes
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Role Switch Request -->
+                    {% if user.role != 'admin' %}
+                    <div class="alert alert-info border mt-3">
+                        <h6 class="mb-2"><i class="fas fa-exchange-alt"></i> Request Role Switch</h6>
+                        <p class="small text-muted mb-2">Want to switch your role? Submit a request for admin approval.
+                        </p>
+                        <form method="POST" action="{{ url_for('user.request_role_switch') }}"
+                            class="d-flex gap-2 align-items-center">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <select name="requested_role" class="form-select form-select-sm" style="width:auto;">
+                                {% if user.role == 'shop' %}
+                                <option value="home">Home</option>
+                                {% else %}
+                                <option value="shop">Shop</option>
+                                {% endif %}
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-warning">
+                                <i class="fas fa-paper-plane"></i> Request Switch
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
