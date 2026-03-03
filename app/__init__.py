@@ -203,6 +203,11 @@ def create_app():
         try:
             db.create_all()
             auto_migrate()
+            
+            # Initialize the background alert scheduler for production/development
+            from .scheduler import init_scheduler
+            init_scheduler(app)
+            
         except Exception as e:
             logger.error(f"Error during app context initialization: {e}")
 
