@@ -32,6 +32,29 @@ def index():
     return redirect(url_for('user.login'))
 
 
+@user_bp.route('/debug-env')
+def debug_env():
+    """Diagnostic route to check connection and environment."""
+    from sqlalchemy import text
+    import os
+    
+    diagnostic = {
+        "Database_URL_Exists": bool(os.getenv("DATABASE_URL")),
+        "Database_URL_Preview": (os.getenv("DATABASE_URL")[:15] + "...") if os.getenv("DATABASE_URL") else "Missing",
+        "Flask_Env": os.getenv("FLASK_ENV", "None"),
+        "Database_Connected": False,
+        "Error": None
+    }
+    
+    try:
+        db.session.execute(text("SELECT 1"))
+        diagnostic["Database_Connected"] = True
+    except Exception as e:
+        diagnostic["Error"] = str(e)
+
+    return diagnostic
+
+
 @user_bp.route('/register', methods=['GET', 'POST'])
 @limiter.limit("100 per hour")
 def register():
